@@ -1,7 +1,7 @@
 # Migrating from OGS draft 1 to draft 3
 
 Draft 3 is not backwards compatible with draft 1, on purpose, and there is no compatibility mode. Draft 2 (draft 1 plus
-[PROPOSALS.md](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/e196a00e4114ed26ea49812b1c6f2293f77209e2/spec/PROPOSALS.md)) was never published as a separate document. Its open wire changes P1, P2, P7, P8,
+[PROPOSALS.md](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/a1ce0f2/spec/PROPOSALS.md)) was never published as a separate document. Its open wire changes P1, P2, P7, P8,
 P9 and P11 are superseded by draft 3 (table at the end). Draft-1 and draft-3 traffic can't be confused: they use
 different kinds (`21078`/`21079`/`30078` versus `31078`), different labels and different invite texts. An app can
 speak both during a transition, but every stream and every invite has to be created again under draft 3.
@@ -19,11 +19,11 @@ speak both during a transition, but every stream and every invite has to be crea
 | Live readings | ephemeral `21078` per reading, plus hour chunks | the current 15-minute `cgm` block, republished per reading (addressable) | subscribe by authors; merge rows |
 | Roster | `roster`: `devices`, `writers`, `relays`, `profile` under `(epoch, created_at)` | `membership`: `devices`, contributors with scopes and windows, the administrator's inbox, `caps`, under `seq` | new record type |
 | Inboxes | every request to `I` (a constant key in `p` tags) | to a per-invite inbox (join) and a per-epoch administrator inbox; members choose their own inbox key | `I` never appears in a tag |
-| Invite text | `https://sukrara.mauri.app/join#` + 32 characters; salt `sukrara/invite/v3` | `ogs:` + 34 characters (version byte), optional relay hints, any `https://host/…#ogs:` | new parser; the host is irrelevant |
+| Invite text | `https://sukrara.mauri.app/join#` + 32 characters; salt `sukrara/invite/v3` | `ogs:` + 34 characters (version byte, 12-byte fingerprint, 12-byte secret), optional relay hints, any `https://host/…#ogs:` | new parser; the host is irrelevant |
 | Match code | 4 digits, `sha256(F + token) mod 10⁴` | 6 digits, `sha256(M + ":" + token) mod 10⁶` | new code |
 | Offer | none: approval gave everything | the invite carries `scopes`, `back` (history days), `days` (duration) | show it before joining |
 | Writers | writers publish under their own visible key; the owner re-signs an echo; complex creator rules | contributors publish under their blinded key; no echo; entries keyed by `(by, id)` | simpler: drop echo handling |
-| Revocation | rotate `G`, `revoked` notice | rotate the epoch (new tree, authors, inboxes, BLE ids); `epoch_end` in the old epoch; `ended` notice | handle `epoch_end` and `ended` |
+| Revocation | rotate `G`, `revoked` notice | rotate the epoch (new tree, authors, inboxes, BLE ids); a last membership and `epoch_end` in the old epoch, which members cut at its last day; `ended` notice | handle `epoch_end`, a grant's `end` and `ended` |
 | Time-limited access | not possible | a cover with an end day; no rotation needed | — |
 | Emergency access | none | standing `auto`/`multi` invites (OPTIONAL) | — |
 | Data: glucose | integer mg/dL, `r` mg/dL/min, no flags | the same units, plus row flags (`lo`, `hi`, `warmup`, `unreliable`, `calibrated`, `backfilled`, `interpolated`) and `tz` | map flags; show bounds |
@@ -34,9 +34,9 @@ speak both during a transition, but every stream and every invite has to be crea
 | Data: alerts | `k` closed set incl. `very_high`, `extremely_high`; `state` fire/clear; `at` | open `kind`, `prio`, `state` active/cleared, `start`/`last`/`end`, `rev`, optional `text` | map: `fire` → `active`; `extremely_high` stays valid as an open value |
 | Enumerations | closed (unknown → reject) | open (unknown → keep, show generically) | stop rejecting |
 | Versioning | `v` per object (2, 3, 1) | no `v`: the kind and labels name the version; `caps`; new type names for breaking changes | drop `v` checks |
-| BLE | constant service `7c6a0001-…`; `HELLO {nonce}` / `INFO {nonce, m}`; `INFO.i` while pairing | day GATT UUIDs, a 15-minute advertised UUID; `HELLO {nonce, since}` / `INFO {nonce, proof}`; a separate pairing service carrying the invite text | new discovery; framing unchanged |
+| BLE | constant service `7c6a0001-…`; `HELLO {nonce}` / `INFO {nonce, m}`; `INFO.i` while pairing | day GATT UUIDs, a 15-minute advertised UUID; `HELLO {nonce, since}` / `INFO {nonce, proof, challenge}` / `AUTH {proof}` (both sides prove the day key); a separate pairing service carrying the invite text | new discovery; framing unchanged |
 | Profiles | `{name, avatar}` inside payloads | unchanged, but no vendor string allowed in a future renderer | — |
-| Owner backup | kind 30078 signed by `I` (visible) | kind 31078 by a key derived from `I` (C§13), optional | — |
+| Owner backup | kind 30078 signed by `I` (visible) | kind 31078 by a key derived from `I` per 30-day period, opaque `d` (C§13), optional | — |
 
 ## Draft-2 proposals
 
@@ -60,4 +60,4 @@ speak both during a transition, but every stream and every invite has to be crea
 ## For Sukrara
 
 What moving the reference app to draft 3 costs is estimated in
-[docs/24b-open-standard-draft3.md](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/e196a00e4114ed26ea49812b1c6f2293f77209e2/docs/24b-open-standard-draft3.md#cost-of-moving-sukrara).
+[docs/24b-open-standard-draft3.md](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/a1ce0f2/docs/24b-open-standard-draft3.md#cost-of-moving-sukrara).
