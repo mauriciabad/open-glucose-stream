@@ -9,7 +9,7 @@
 as you choose. It runs over public Nostr relays when they're apart and over Bluetooth when they're close. There's no
 account and no server, and nothing public links a stream to a person.**
 
-`draft 3` · 2026-10-19 · status: **proposal**. No app speaks it yet. Sukrara 0.11 speaks [draft 1](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/a1ce0f2/spec/README.md).
+`draft 3` · 2026-10-19 · status: **proposal**. No app speaks it yet. Sukrara 0.11 speaks [draft 1](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/6892c2a/spec/README.md).
 · independent reference implementation: [`../reference`](../reference) (Python)
 
 Draft 3 is a clean-sheet redesign. Draft 1 described one app's wire format. Draft 3 starts from requirements and the
@@ -28,7 +28,7 @@ current state of the art ([rationale.md](rationale.md)), and breaks compatibilit
 | [conformance.md](conformance.md) | **Checklist** per class: reader, contributor, publisher, administrator, nearby, bridge, portable |
 | [rationale.md](rationale.md) | **Requirements and decisions**: what was considered, what was chosen and why, and what the state-of-the-art review changed |
 | [migration-from-draft1.md](migration-from-draft1.md) | **What changed** for apps that implemented draft 1 |
-| [review (docs/24c)](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/a1ce0f2/docs/24c-draft3-review.md) | **Independent review** of draft 3 and what it changed |
+| [review (docs/24c)](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/6892c2a/docs/24c-draft3-review.md) | **Independent review** of draft 3 and what it changed |
 | [test-vectors/ogs-draft3.json](../test-vectors/ogs-draft3.json) | **Vectors**: tree, covers, day material, blinded authors, invite, 44 events with plaintexts, a 42-step acceptance scenario, administrator checks, Bluetooth, bridges |
 
 ## The model in one screen

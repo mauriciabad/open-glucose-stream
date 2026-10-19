@@ -1,7 +1,7 @@
 # Migrating from OGS draft 1 to draft 3
 
 Draft 3 is not backwards compatible with draft 1, on purpose, and there is no compatibility mode. Draft 2 (draft 1 plus
-[PROPOSALS.md](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/a1ce0f2/spec/PROPOSALS.md)) was never published as a separate document. Its open wire changes P1, P2, P7, P8,
+[PROPOSALS.md](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/6892c2a/spec/PROPOSALS.md)) was never published as a separate document. Its open wire changes P1, P2, P7, P8,
 P9 and P11 are superseded by draft 3 (table at the end). Draft-1 and draft-3 traffic can't be confused: they use
 different kinds (`21078`/`21079`/`30078` versus `31078`), different labels and different invite texts. An app can
 speak both during a transition, but every stream and every invite has to be created again under draft 3.
@@ -60,4 +60,4 @@ speak both during a transition, but every stream and every invite has to be crea
 ## For Sukrara
 
 What moving the reference app to draft 3 costs is estimated in
-[docs/24b-open-standard-draft3.md](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/a1ce0f2/docs/24b-open-standard-draft3.md#cost-of-moving-sukrara).
+[docs/24b-open-standard-draft3.md](https://github.com/mauriciabad/cgm-reading-mac-spike/blob/6892c2a/docs/24b-open-standard-draft3.md#cost-of-moving-sukrara).
