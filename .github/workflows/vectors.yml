@@ -1,0 +1,26 @@
+# Every push: the committed vectors verify, regenerate byte for byte, and the offline tests pass.
+name: Vectors
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  vectors:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: reference
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install uv
+        run: pipx install uv
+      - name: Verify the committed vectors
+        run: uv run ogs d3 vectors verify
+      - name: Regenerate them and compare byte for byte
+        run: |
+          cp ../test-vectors/ogs-draft3.json /tmp/committed.json
+          uv run ogs d3 vectors generate
+          cmp ../test-vectors/ogs-draft3.json /tmp/committed.json
+      - name: Offline tests (NIP-44 and BIP-340 vectors, tree, blinding, invites, data, BLE, vectors)
+        run: uv run python -m unittest discover tests
