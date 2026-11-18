@@ -149,10 +149,14 @@ class Owner:
             return "accepted:join-pending", []
         m = self.members.get(sender)
         if m is None:
+            if t == "leave" and sender in self.pending:  # C§9.5: a join that waits is withdrawn
+                self.pending.pop(sender)
+                return "accepted:leave-pending", []
             return "rejected:not-a-member", []
         if t == "rekey":
             if m["status"] != "active":
-                return "accepted:rekey-ended", [ctl.wrap(self.I, m["inbox"], {"type": "ended", "reason": "removed"},
+                reason = "left" if m.get("left") else "removed"
+                return "accepted:rekey-ended", [ctl.wrap(self.I, m["inbox"], {"type": "ended", "reason": reason},
                                                          now=now)]
             return "accepted:rekey", [self.grant(sender, now)]
         if m["status"] != "active":
@@ -165,7 +169,8 @@ class Owner:
             if hi - lo + 1 > HISTORY_MAX:
                 return "rejected:too-many-days", []
             return f"accepted:history {lo}..{hi}", []
-        if t == "leave":
+        if t == "leave":  # C§9.5: no `ended` (nobody reads it); recorded as left
+            m["left"] = True
             return "accepted:leave", self.remove(sender, now, notify=False)
         if t == "profile":
             m["profile"] = body.get("profile")

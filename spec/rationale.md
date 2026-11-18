@@ -251,6 +251,30 @@ stable.
 - **Cost:** another vendor's sensor app can't feed glucose into an OGS stream directly. It can bridge into the
   wearer's own app instead.
 
+### D17. A leave that is hard to lose
+
+*Decided 2026-11-18, while Sukrara built it on draft 1 (its PROTOCOL-v2 "Leave").*
+- **Considered:**
+  - a one-shot `leave` (draft 3 as first written: 30 days, sent once);
+  - a replaceable or addressable state the member publishes (relays MUST keep the latest version, NIP-01);
+  - retrying until the administrator acknowledges (Marmot's `Leaving` state for MLS SelfRemove);
+  - Bluetooth when nearby;
+  - the administrator inferring "gone" from silence.
+- **Chosen:** a gift-wrapped `leave` kept for a year, sent from a durable outbox until two relays accepted it, over
+  Bluetooth too when connected; the administrator's handling is idempotent and final for that key (C§9.5).
+- **Why:**
+  - A public state event signed by `M` (or a key derived from it) would name a member of the stream on relays: the
+    privacy rule forbids it (S§10).
+  - Waiting for an acknowledgement makes the member keep `M` and a subscription alive for as long as the
+    administrator is offline, and an uninstall loses it all the same. A copy on two relays already outlives an
+    administrator that is off for days.
+  - Relays may drop a stored event (NIP-59: relays may choose not to store gift wraps; NIP-11 no longer has a
+    `retention` field), so one `OK true` isn't enough.
+  - Silence can't tell a member that left from one whose phone is off; it is the only answer to an uninstall while
+    offline, and is left to a later *last seen*.
+- **Coming back** takes a new invite and a new `M`, as every follow app does (a re-approval of a key that left
+  would need a clock rule against replayed leaves, and a lost device would keep a key the wearer re-trusts in one tap).
+
 ## 3. What the state-of-the-art review changed
 
 | Finding (source) | Effect on draft 3 |

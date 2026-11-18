@@ -159,6 +159,37 @@ class Lifecycle(unittest.TestCase):
         self.assertTrue(str(m.on_event(ctl.wrap(self.I, m.inbox.pub, {"type": "ended", "reason": "removed"},
                                                 now=NOW + 120), NOW + 120)).startswith("accepted:ended"))
 
+    def test_a_leave_removes_once_and_never_undoes_a_later_join(self):
+        """C§9.5: an active member's leave removes it and rotates (no `ended`); the same leave again, or after the
+        person joined anew with a new key, changes nothing; a rekey from the key that left is answered `left`."""
+        old = self.o.current
+        leave = self.reader.leave(NOW + 10)
+        verdict, out = self.o.on_wrap(leave, NOW + 10)
+        self.assertEqual(verdict, "accepted:leave")
+        self.assertNotEqual(self.o.current, old)
+        self.assertTrue(self.o.members[self.reader.M.pub]["left"])
+        self.assertEqual(self.o.members[self.reader.M.pub]["status"], "removed")
+        ended = [e for e in out if e.get("kind") == 1059 and ["p", self.reader.inbox.pub] in e.get("tags", [])]
+        self.assertEqual(ended, [], "no `ended` to the member that left")
+        again = _join(self.o, Keys(bytes(31) + b"\x07"), Keys(bytes(31) + b"\x08"), {"scopes": [], "back": 1}, NOW + 20)
+        self.assertEqual(again.status, "active")
+        self.o._seen.clear()  # the administrator forgot it handled the wrap; the relays send it again
+        self.assertEqual(self.o.on_wrap(leave, NOW + 30)[0], "rejected:not-active")
+        self.assertEqual(self.o.members[again.M.pub]["status"], "active")
+        rekey = self.reader.request({"type": "rekey", "have": [old]}, NOW + 40)
+        verdict, out = self.o.on_wrap(rekey, NOW + 40)
+        self.assertEqual(verdict, "accepted:rekey-ended")
+        self.assertEqual(ctl.open_wrap(self.reader.inbox, out[0])[0], {"type": "ended", "reason": "left"})
+
+    def test_a_pending_joins_leave_withdraws_it(self):
+        text, w = self.o.invite(NOW, offer={"scopes": [], "back": 1})
+        m = Member(Keys(bytes(31) + b"\x09"), Keys(bytes(31) + b"\x0a"))
+        m.open_invite(ctl.parse_invite(text), w, NOW)
+        self.o.on_wrap(m.join(None, NOW), NOW)
+        self.assertIn(m.M.pub, self.o.pending)
+        self.assertEqual(self.o.on_wrap(m.leave(NOW + 5), NOW + 5)[0], "accepted:leave-pending")
+        self.assertNotIn(m.M.pub, self.o.pending)
+
     def test_history_requests_are_capped(self):
         req = self.writer.request({"type": "history", "from": day_of(NOW) - 1, "to": day_of(NOW)}, NOW)
         self.assertTrue(self.o.on_wrap(req, NOW)[0].startswith("accepted:history"))

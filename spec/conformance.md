@@ -32,6 +32,8 @@ Joining
 - [ ] Shows the inviter and the offer before joining; sends `join` with a fresh `M` and a fresh inbox; shows the
       six-digit match code (C§8.4–8.5)
 - [ ] Answers AUTH only with its inbox key or the invite key (N§5)
+- [ ] Leaving sends `leave` from a durable outbox (the signed wrap, never `M`) until two relays accepted it, over
+      Bluetooth too when connected; says so while nothing took it; never re-uses `M` (C§9.5)
 
 Acceptance (run the 42-step `scenario` and reach every verdict and the final state)
 - [ ] Grants only from `I`, with a valid membership for every listed epoch; grants add; grants and `ended` ordered by
@@ -84,7 +86,8 @@ Privacy
 - [ ] Membership on every change and daily; only contributors listed; `seq` per epoch (C§9.3)
 - [ ] Rotation on removal, on device removal, on shortening a grant, before the epoch ends; SHOULD every 30 days.
       A last membership in the old epoch when a listed key was removed, then `epoch_end` (C§11.2, C§11.5)
-- [ ] Deduplicates wraps; answers rekey, history (≤ 31 days) and leave per C§9.4
+- [ ] Deduplicates wraps; answers rekey, history (≤ 31 days) and leave per C§9.4 and C§9.5 (a leave twice, from a
+      removed key or after a re-join changes nothing; a pending join's leave withdraws it)
 - [ ] Emergency invites, if offered: no scopes at all, short window, notify, rate limit (C§8.7)
 - [ ] MUST NOT list in `devices`, or send epoch roots to, any key learnt through an invite, `join`, `link` or
       `manage`, or any third-party app or device; those are members only (C§11.6)
