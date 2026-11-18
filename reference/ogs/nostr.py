@@ -146,3 +146,50 @@ def unwrap(recipient: Keys, wrap: dict) -> tuple[dict, str]:
     if "id" in rum and rum["id"] != event_id(rum):
         raise UnwrapError("rumor id mismatch")
     return rum, seal["pubkey"]
+
+
+def relay_key(url: str) -> str:
+    """N§3.4: which relay `url` names. Scheme and host in lower case; the scheme's default port (443 for wss, 80 for
+    ws), a fragment, repeated slashes and a trailing slash dropped; the path keeps its case (RFC 3986 §6.2.2–6.2.3).
+    Two URLs name the same relay when their keys are equal."""
+    text = url.strip().split("#", 1)[0]
+    if "://" not in text:
+        return text.lower()
+    scheme, rest = text.split("://", 1)
+    scheme = scheme.lower()
+    slash = rest.find("/")
+    authority, path = (rest, "") if slash < 0 else (rest[:slash], rest[slash:])
+    authority = authority.lower()
+    default = {"wss": ":443", "ws": ":80"}.get(scheme)
+    if default and authority.endswith(default):
+        authority = authority[: -len(default)]
+    while "//" in path:
+        path = path.replace("//", "/")
+    return f"{scheme}://{authority}{path.rstrip('/')}"
+
+
+@dataclass(frozen=True)
+class RelayOk:
+    """N§3.4: a relay's NIP-01 answer `["OK", <event id>, <true|false>, <message>, …]` to an EVENT. `accepted` is the
+    third element when it is the JSON `true` (anything else: False); `message` the fourth when it is a string."""
+    event_id: str
+    accepted: bool
+    message: str = ""
+
+    @staticmethod
+    def parse(msg) -> "RelayOk | None":
+        """The answer in a relay message (a decoded JSON array); None when it isn't an `OK` with a string id."""
+        if not isinstance(msg, list) or len(msg) < 2 or msg[0] != "OK" or not isinstance(msg[1], str):
+            return None
+        message = msg[3] if len(msg) > 3 and isinstance(msg[3], str) else ""
+        return RelayOk(msg[1], len(msg) > 2 and msg[2] is True, message)
+
+    @property
+    def kept(self) -> bool:
+        """The relay keeps the event: `true` whatever the message, or `false` with `duplicate:` (it holds that id)."""
+        return self.accepted or self.message.startswith("duplicate:")
+
+    @property
+    def auth_required(self) -> bool:
+        """NIP-42 on a write: authenticate (N§5), then send the event again on that connection."""
+        return not self.accepted and self.message.startswith("auth-required:")

@@ -348,6 +348,24 @@
    "id": "0c7a47bfbeaf0c9c1cee10eb53af5502024685144694f4f879dbc2fdf352364e",
    "sig": "2a579b434cfec444ec7c204a8a71df12804370d6fd4157f4185552d534872cfe27bdef193979c28003d32530fa5d79c3e99d0e3feb74dea98c17083abb9b6c55"
   },
+  "leave-F": {
+   "pubkey": "02c69c60a90222372cf6d3392605133c3330a23030b4afd70e4f0c606398b52a",
+   "created_at": 1792085200,
+   "kind": 1059,
+   "tags": [
+    [
+     "p",
+     "65d8eaad024c2cc4e76d320d1f506cd09b1afdf69bfdd0057ad4b4d4312b5557"
+    ],
+    [
+     "expiration",
+     "1823623200"
+    ]
+   ],
+   "content": "AqYNeUNE9XEleVXeVOv6BKFRVmaZ8ZqOZvL5p+WDM+YmOXGTOMpEWy/igMOv0GPjtAaa0uFSi5Z3WYfin96CKlXvEFIfFDivsk8GjqPE8Vr2wRXAu8WTtvMAhheaeknfOwmEbM6qFtWc64EfiK/a3H88odIewbMMVNCLONUmVikZvmG6eKDx1UWisTHYoIuuFSKIYWTrtfLbbdnXwQ/axJ9hWcyLficFYDu2cQxaRwuGyloVGXmvUEs2AMCV8Jxnqo7IRauiqMEoVV3wiL8FZjDWW/uEgQz6OMfVsxq70E4qta5U0hvJTSP2zrzSFLkjh9CesvKTjnHHpp9wp9/nsUqvw0ffJxWmpxQ+OVMpnB9GzArIQU/Nql8PmbNmsTIAX6BNCX9S1ctspPxp1YpbbcbHL/F0nIFwadapVALQXZvLNi+ZatDG1QK9Ecz4UFVkLzpHE1jqsxfna6kRKMstmzW5BWn0lqncRIrpVF7Bv+DbgEwR7EjRdJVn68UfpPlv5RHO+VRHP0bfse5juDieZlLWt+4B58xDDV6HFhlRqEKMuV4UEv6OpW+XM+/ZEGkXAiZ8+8ZXXyDZuUuJ7vbgy1Alo5PNwMtN/gFCgKG5mw9H3B678TzwlbfY8LdB6HFtXPboRR39X5ap09QtWjyGnsOMdTKi2DRHC8N/LdGCBVyaPIp9ASsIuYCM9rnBqLi6cGDeO++uCWcDk0gzEj5ms8LLIDOB9R3zzXhxVlOuo0K5zEKAqShFveLiEqpR7MGckUfeeYSaOhVgjAB4Dhovp92XaGENIK4BkpItgQaSzcm+xSYSmMkv645k1OugQvNLBxDj0zoAGdDc0b9bbt3ZippuvdoHraoi5Cwa7EKTZqyKmYE3gHNdfsZdmYFxmuZiqywK+riIYjVAOzvBxo7ie/X3aQ/XtrmGWoKPb38TRxVvIRV4mlMyai7iyWD8zcIZfiBn2SgTRV5vajkrHy4IvbrJ4SxWpQQKVhGjyFjkNJmc4cFEqQaxqWBi9ucfDBsFfZRQKqzL0GgvBIrXUuAGnDwS/eBSQbWtnzr8Q1VfYOvnVzYQu4kVEgelPIpbX4voXJI7NUsTKp/NGy+xwU1gyzU0YHPgC98oeeRmhyl+C+lvQSdqikC6OuTVmxqbqtKgXK7MOuL7nPbmFannCT4n6lnh4Aw2xDTp2W8Tp+7Coq4TZnPB/f7ayP0vw4c0VgepF2qckJo+nxv+38Eqkpv9R1EUFVMqRmh+zqJcnDWwe9eH7EqldyNlpNrJPNp/Gr+K7+u+",
+   "id": "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+   "sig": "8a9a068b53c92f24ce2f31f90789f0a29590e94c0917eff7b4e89c1a560bd5196f3d6dea9f26c8f1450df9954ae3dd58965a9f0804bd8ab4c87ababcae849394"
+  },
   "join-X-same-token": {
    "pubkey": "6dad5b52520efa1130a9f6ef9e81a5a2951537a5576b5149a4549015c80fc3fc",
    "created_at": 1792085200,
@@ -1120,6 +1138,18 @@
     "id": "01a2bc6712475290ac1a26a633c70c3be2846fa982c08b63d6b6bc9d95520e81"
    }
   },
+  "leave-F": {
+   "recipient": "65d8eaad024c2cc4e76d320d1f506cd09b1afdf69bfdd0057ad4b4d4312b5557",
+   "seal_signer": "63fee5a2f7ad2440a9946a31c185c1544c2c974c3340ce12f062661f8ed28535",
+   "rumor": {
+    "pubkey": "63fee5a2f7ad2440a9946a31c185c1544c2c974c3340ce12f062661f8ed28535",
+    "created_at": 1792087200,
+    "kind": 4079,
+    "tags": [],
+    "content": "{\"type\":\"leave\"}",
+    "id": "c291d37f2d5186715fa5b66feb983a5df872dc0e7665bc134126535974cbab26"
+   }
+  },
   "join-X-same-token": {
    "recipient": "65d8eaad024c2cc4e76d320d1f506cd09b1afdf69bfdd0057ad4b4d4312b5557",
    "seal_signer": "c9f242388adac4f97721c577d16ac2ead1154067dc0d01f64c7692befa293b05",
@@ -1777,5 +1807,670 @@
    "-3.0": "DoubleDown",
    "None": "NONE"
   }
+ },
+ "relay_answers": {
+  "keys": [
+   {
+    "url": "wss://nos.lol",
+    "key": "wss://nos.lol"
+   },
+   {
+    "url": "wss://nos.lol/",
+    "key": "wss://nos.lol"
+   },
+   {
+    "url": "wss://Nos.LOL",
+    "key": "wss://nos.lol"
+   },
+   {
+    "url": "WSS://nos.lol",
+    "key": "wss://nos.lol"
+   },
+   {
+    "url": "wss://nos.lol:443",
+    "key": "wss://nos.lol"
+   },
+   {
+    "url": "wss://nos.lol:443/",
+    "key": "wss://nos.lol"
+   },
+   {
+    "url": " wss://nos.lol ",
+    "key": "wss://nos.lol"
+   },
+   {
+    "url": "wss://nos.lol/#top",
+    "key": "wss://nos.lol"
+   },
+   {
+    "url": "wss://nos.lol:80",
+    "key": "wss://nos.lol:80"
+   },
+   {
+    "url": "ws://nos.lol",
+    "key": "ws://nos.lol"
+   },
+   {
+    "url": "ws://nos.lol:80/",
+    "key": "ws://nos.lol"
+   },
+   {
+    "url": "ws://nos.lol:443",
+    "key": "ws://nos.lol:443"
+   },
+   {
+    "url": "wss://relay.example.org:4848",
+    "key": "wss://relay.example.org:4848"
+   },
+   {
+    "url": "wss://relay.example.org:4848/",
+    "key": "wss://relay.example.org:4848"
+   },
+   {
+    "url": "wss://relay.example.org/inbox",
+    "key": "wss://relay.example.org/inbox"
+   },
+   {
+    "url": "wss://relay.example.org/inbox/",
+    "key": "wss://relay.example.org/inbox"
+   },
+   {
+    "url": "wss://relay.example.org//inbox",
+    "key": "wss://relay.example.org/inbox"
+   },
+   {
+    "url": "wss://relay.example.org/Inbox",
+    "key": "wss://relay.example.org/Inbox"
+   },
+   {
+    "url": "ws://10.0.2.2:7447",
+    "key": "ws://10.0.2.2:7447"
+   },
+   {
+    "url": "ws://10.0.2.2:7447/",
+    "key": "ws://10.0.2.2:7447"
+   }
+  ],
+  "answers": [
+   {
+    "why": "NIP-01: accepted",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     true,
+     ""
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": true,
+    "auth": false
+   },
+   {
+    "why": "NIP-01 / NIP-20: already stored (a resend after a lost answer or a reconnect)",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     true,
+     "duplicate: already have this event"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": true,
+    "auth": false
+   },
+   {
+    "why": "strfry's wording",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     true,
+     "duplicate: have this event"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": true,
+    "auth": false
+   },
+   {
+    "why": "NIP-20 says MUST be true; some relays say false: the relay holds this exact id",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     false,
+     "duplicate: already have this event"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": true,
+    "auth": false
+   },
+   {
+    "why": "accepted with a reason",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     true,
+     "pow: difficulty 25>=24"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": true,
+    "auth": false
+   },
+   {
+    "why": "an old relay leaves the message out",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     true
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": true,
+    "auth": false
+   },
+   {
+    "why": "NIP-01's optional fifth element",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     true,
+     "",
+     "1000"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": true,
+    "auth": false
+   },
+   {
+    "why": "refused",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     false,
+     "blocked: you are banned from posting here"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "refused for now: sent again later",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     false,
+     "rate-limited: slow down there chief",
+     "1000"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "refused",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     false,
+     "invalid: event creation date is too far off from the current time"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "refused after AUTH (NIP-42)",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     false,
+     "restricted: not allowed to write."
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "NIP-42: AUTH, then send it again on this connection",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     false,
+     "auth-required: we only accept events from registered users"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": true
+   },
+   {
+    "why": "the prefix counts, not a word inside the message",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     false,
+     "error: duplicate: key value violates unique constraint"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "refused without a reason",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     false
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "only a JSON true accepts",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     "true",
+     ""
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "only a JSON true accepts",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+     1,
+     ""
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "no verdict",
+    "frame": [
+     "OK",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30"
+    ],
+    "id": "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30",
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "no event id",
+    "frame": [
+     "OK"
+    ],
+    "id": null,
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "an id that isn't a string",
+    "frame": [
+     "OK",
+     5,
+     true,
+     ""
+    ],
+    "id": null,
+    "kept": false,
+    "auth": false
+   },
+   {
+    "why": "not an OK",
+    "frame": [
+     "NOTICE",
+     "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30"
+    ],
+    "id": null,
+    "kept": false,
+    "auth": false
+   }
+  ]
+ },
+ "leave_outbox": {
+  "wrap": "leave-F",
+  "relays": [
+   "wss://a.example/",
+   "wss://B.example",
+   "wss://c.example:4848",
+   "wss://c.example/inbox"
+  ],
+  "runs": [
+   {
+    "name": "online",
+    "answers": [
+     {
+      "from": "wss://a.example/",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     },
+     {
+      "from": "wss://B.example",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       "duplicate: already have this event"
+      ]
+     }
+    ],
+    "told": true,
+    "done": true,
+    "waiting": [
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "one-relay",
+    "answers": [
+     {
+      "from": "wss://a.example/",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     }
+    ],
+    "told": true,
+    "done": false,
+    "waiting": [
+     "wss://B.example",
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "duplicate-only",
+    "answers": [
+     {
+      "from": "wss://c.example:4848",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       "duplicate: already have this event"
+      ]
+     }
+    ],
+    "told": true,
+    "done": false,
+    "waiting": [
+     "wss://a.example/",
+     "wss://B.example",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "duplicate-false",
+    "answers": [
+     {
+      "from": "wss://c.example/inbox",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       false,
+       "duplicate: already have this event"
+      ]
+     },
+     {
+      "from": "wss://a.example/",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true
+      ]
+     }
+    ],
+    "told": true,
+    "done": true,
+    "waiting": [
+     "wss://B.example",
+     "wss://c.example:4848"
+    ]
+   },
+   {
+    "name": "spelled-another-way",
+    "answers": [
+     {
+      "from": "wss://A.example:443",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     },
+     {
+      "from": "wss://b.example/",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     }
+    ],
+    "told": true,
+    "done": true,
+    "waiting": [
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "another-port-or-path-is-another-relay",
+    "answers": [
+     {
+      "from": "wss://c.example",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     },
+     {
+      "from": "wss://c.example:4849",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     },
+     {
+      "from": "wss://c.example/outbox",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     }
+    ],
+    "told": false,
+    "done": false,
+    "waiting": [
+     "wss://a.example/",
+     "wss://B.example",
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "refused",
+    "answers": [
+     {
+      "from": "wss://a.example/",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       false,
+       "blocked: you are banned from posting here"
+      ]
+     },
+     {
+      "from": "wss://B.example",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       false,
+       "rate-limited: slow down there chief",
+       "1000"
+      ]
+     },
+     {
+      "from": "wss://c.example:4848",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       false,
+       "auth-required: we only accept events from registered users"
+      ]
+     },
+     {
+      "from": "wss://c.example/inbox",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       "true",
+       ""
+      ]
+     }
+    ],
+    "told": false,
+    "done": false,
+    "waiting": [
+     "wss://a.example/",
+     "wss://B.example",
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "another-event",
+    "answers": [
+     {
+      "from": "wss://a.example/",
+      "ok": [
+       "OK",
+       "0c7a47bfbeaf0c9c1cee10eb53af5502024685144694f4f879dbc2fdf352364e",
+       true,
+       ""
+      ]
+     },
+     {
+      "from": "wss://B.example",
+      "ok": [
+       "NOTICE",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb"
+      ]
+     }
+    ],
+    "told": false,
+    "done": false,
+    "waiting": [
+     "wss://a.example/",
+     "wss://B.example",
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "offline",
+    "answers": [],
+    "told": false,
+    "done": false,
+    "waiting": [
+     "wss://a.example/",
+     "wss://B.example",
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "nearby-only",
+    "nearby": true,
+    "answers": [],
+    "told": true,
+    "done": false,
+    "waiting": [
+     "wss://a.example/",
+     "wss://B.example",
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "a-relay-not-listed",
+    "answers": [
+     {
+      "from": "wss://x.example",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     },
+     {
+      "from": "wss://a.example/",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     }
+    ],
+    "told": true,
+    "done": false,
+    "waiting": [
+     "wss://B.example",
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   },
+   {
+    "name": "one-relay-membership",
+    "relays": [
+     "wss://a.example"
+    ],
+    "answers": [
+     {
+      "from": "wss://a.example",
+      "ok": [
+       "OK",
+       "fde5be0a25152e95888139006f30399787155167a6610785211e1bdcfe2338eb",
+       true,
+       ""
+      ]
+     }
+    ],
+    "told": true,
+    "done": true,
+    "waiting": []
+   },
+   {
+    "name": "expired",
+    "answers": [],
+    "after": 31536000,
+    "told": false,
+    "done": true,
+    "waiting": [
+     "wss://a.example/",
+     "wss://B.example",
+     "wss://c.example:4848",
+     "wss://c.example/inbox"
+    ]
+   }
+  ]
  }
 }

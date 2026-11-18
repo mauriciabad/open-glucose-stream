@@ -31,9 +31,12 @@ Joining
 - [ ] Opens the invite only with the 12-byte fingerprint and an unexpired `x`; passes `invite_checks` (C§8.3)
 - [ ] Shows the inviter and the offer before joining; sends `join` with a fresh `M` and a fresh inbox; shows the
       six-digit match code (C§8.4–8.5)
-- [ ] Answers AUTH only with its inbox key or the invite key (N§5)
-- [ ] Leaving sends `leave` from a durable outbox (the signed wrap, never `M`) until two relays accepted it, over
-      Bluetooth too when connected; says so while nothing took it; never re-uses `M` (C§9.5)
+- [ ] Answers AUTH only with its inbox key or the invite key, or a one-time key for a write (N§5)
+- [ ] Reads relay answers as N§3.4 (by id on the connection they came on; kept on `true` whatever the message and on
+      `false` with `duplicate:`; relays told apart by normalised URL); reproduces `relay_answers`
+- [ ] Leaving sends `leave` from a durable outbox (the signed wrap, never `M`) until two of its relays keep it
+      (N§3.4), over Bluetooth too when connected; says so while it isn't told; never re-uses `M`; reproduces
+      `leave_outbox` (C§9.5)
 
 Acceptance (run the 42-step `scenario` and reach every verdict and the final state)
 - [ ] Grants only from `I`, with a valid membership for every listed epoch; grants add; grants and `ended` ordered by
@@ -74,7 +77,7 @@ Privacy
 - [ ] No serial numbers or other identifiers; random `sess` (D§1, D§5)
 - [ ] `sensor` on change and daily; `device` every 15 minutes while publishing (D§5, D§6)
 - [ ] Alerts with `id`, `prio`, `state`, `n`, `rev` (D§8)
-- [ ] Publishes to every relay in the membership, at least 1 s apart per relay (N§3)
+- [ ] Publishes to every relay in the membership, at least 1 s apart per relay; reads their answers as N§3.4 (N§3)
 
 ## A — Administrator
 - [ ] Separate `I`, publisher keys and epoch roots from a secure random generator; `start` = today − 30 (C§4.1)

@@ -13,7 +13,7 @@ import hashlib
 import json
 import math
 
-from ..nostr import Keys, sign, unwrap, verify
+from ..nostr import Keys, RelayOk, relay_key, sign, tag, unwrap, verify
 from . import bridges as BR
 from . import control as ctl
 from . import data as D
@@ -21,6 +21,7 @@ from .ble import WINDOW, adv_uuid, auth, gatt_uuids, hello, info, pairing_info, 
 from .core import (DayKeys, Epoch, EpochSecret, check_record, cover, day_of, lane_of, object_name, open_envelope,
                    record_day, seal, sign_record)
 from .member import Member, expiry
+from .outbox import PendingLeave
 from .owner import Owner
 
 NOW = 1792087200                  # 2026-10-15T18:00:00Z
@@ -30,6 +31,101 @@ RELAYS = ["wss://relay.example.org", "wss://nos.lol"]
 PROFILE = {"name": "Alex", "avatar": {"v": 1, "c": 0, "s": "cube", "a": 45, "n": 1497950029}}
 SESS = "s3ns0r-0001"
 TZ = 120
+
+# N§3.4: relay URLs -> the key that tells relays apart, and relay answers -> what they mean
+ANSWER_ID = "b1a649ebe8b435ec71d3784793f3bbf4b93e64e17568a741aecd4c7ddeafce30"  # NIP-01's example id
+RELAY_KEYS = [
+    ("wss://nos.lol", "wss://nos.lol"), ("wss://nos.lol/", "wss://nos.lol"), ("wss://Nos.LOL", "wss://nos.lol"),
+    ("WSS://nos.lol", "wss://nos.lol"), ("wss://nos.lol:443", "wss://nos.lol"), ("wss://nos.lol:443/", "wss://nos.lol"),
+    (" wss://nos.lol ", "wss://nos.lol"), ("wss://nos.lol/#top", "wss://nos.lol"),
+    ("wss://nos.lol:80", "wss://nos.lol:80"), ("ws://nos.lol", "ws://nos.lol"), ("ws://nos.lol:80/", "ws://nos.lol"),
+    ("ws://nos.lol:443", "ws://nos.lol:443"), ("wss://relay.example.org:4848", "wss://relay.example.org:4848"),
+    ("wss://relay.example.org:4848/", "wss://relay.example.org:4848"),
+    ("wss://relay.example.org/inbox", "wss://relay.example.org/inbox"),
+    ("wss://relay.example.org/inbox/", "wss://relay.example.org/inbox"),
+    ("wss://relay.example.org//inbox", "wss://relay.example.org/inbox"),
+    ("wss://relay.example.org/Inbox", "wss://relay.example.org/Inbox"),
+    ("ws://10.0.2.2:7447", "ws://10.0.2.2:7447"), ("ws://10.0.2.2:7447/", "ws://10.0.2.2:7447")]
+RELAY_ANSWERS = [  # (why, frame, kept, auth required)
+    ("NIP-01: accepted", ["OK", ANSWER_ID, True, ""], True, False),
+    ("NIP-01 / NIP-20: already stored (a resend after a lost answer or a reconnect)",
+     ["OK", ANSWER_ID, True, "duplicate: already have this event"], True, False),
+    ("strfry's wording", ["OK", ANSWER_ID, True, "duplicate: have this event"], True, False),
+    ("NIP-20 says MUST be true; some relays say false: the relay holds this exact id",
+     ["OK", ANSWER_ID, False, "duplicate: already have this event"], True, False),
+    ("accepted with a reason", ["OK", ANSWER_ID, True, "pow: difficulty 25>=24"], True, False),
+    ("an old relay leaves the message out", ["OK", ANSWER_ID, True], True, False),
+    ("NIP-01's optional fifth element", ["OK", ANSWER_ID, True, "", "1000"], True, False),
+    ("refused", ["OK", ANSWER_ID, False, "blocked: you are banned from posting here"], False, False),
+    ("refused for now: sent again later", ["OK", ANSWER_ID, False, "rate-limited: slow down there chief", "1000"],
+     False, False),
+    ("refused", ["OK", ANSWER_ID, False, "invalid: event creation date is too far off from the current time"],
+     False, False),
+    ("refused after AUTH (NIP-42)", ["OK", ANSWER_ID, False, "restricted: not allowed to write."], False, False),
+    ("NIP-42: AUTH, then send it again on this connection",
+     ["OK", ANSWER_ID, False, "auth-required: we only accept events from registered users"], False, True),
+    ("the prefix counts, not a word inside the message",
+     ["OK", ANSWER_ID, False, "error: duplicate: key value violates unique constraint"], False, False),
+    ("refused without a reason", ["OK", ANSWER_ID, False], False, False),
+    ("only a JSON true accepts", ["OK", ANSWER_ID, "true", ""], False, False),
+    ("only a JSON true accepts", ["OK", ANSWER_ID, 1, ""], False, False),
+    ("no verdict", ["OK", ANSWER_ID], False, False),
+    ("no event id", ["OK"], False, False),
+    ("an id that isn't a string", ["OK", 5, True, ""], False, False),
+    ("not an OK", ["NOTICE", ANSWER_ID], False, False)]
+
+
+def answered_id(frame: list) -> str | None:
+    """The event an `OK` frame answers (None: not an `OK` with a string id)."""
+    return frame[1] if len(frame) > 1 and frame[0] == "OK" and isinstance(frame[1], str) else None
+
+
+OUTBOX_RELAYS = ["wss://a.example/", "wss://B.example", "wss://c.example:4848", "wss://c.example/inbox"]
+
+
+def leave_outbox_runs(leave: str, other: str) -> list[dict]:
+    """C§9.5 + N§3.4: a leave (wrap id `leave`) sent to OUTBOX_RELAYS, what the relays answer (`from`: the URL the
+    answering connection was opened to; `ok`: the relay's message), told / done / still to send after them."""
+    def ok(*rest, of=leave):
+        return ["OK", of, *rest]
+
+    a, b, c, d = OUTBOX_RELAYS
+    dup = "duplicate: already have this event"
+    return [
+        {"name": "online", "answers": [{"from": a, "ok": ok(True, "")}, {"from": b, "ok": ok(True, dup)}],
+         "told": True, "done": True, "waiting": [c, d]},
+        {"name": "one-relay", "answers": [{"from": a, "ok": ok(True, "")}], "told": True, "done": False,
+         "waiting": [b, c, d]},
+        {"name": "duplicate-only", "answers": [{"from": c, "ok": ok(True, dup)}], "told": True, "done": False,
+         "waiting": [a, b, d]},
+        {"name": "duplicate-false", "answers": [{"from": d, "ok": ok(False, dup)}, {"from": a, "ok": ok(True)}],
+         "told": True, "done": True, "waiting": [b, c]},
+        {"name": "spelled-another-way", "answers": [{"from": "wss://A.example:443", "ok": ok(True, "")},
+                                                    {"from": "wss://b.example/", "ok": ok(True, "")}],
+         "told": True, "done": True, "waiting": [c, d]},
+        {"name": "another-port-or-path-is-another-relay",
+         "answers": [{"from": "wss://c.example", "ok": ok(True, "")},
+                     {"from": "wss://c.example:4849", "ok": ok(True, "")},
+                     {"from": "wss://c.example/outbox", "ok": ok(True, "")}],
+         "told": False, "done": False, "waiting": [a, b, c, d]},
+        {"name": "refused", "answers": [
+            {"from": a, "ok": ok(False, "blocked: you are banned from posting here")},
+            {"from": b, "ok": ok(False, "rate-limited: slow down there chief", "1000")},
+            {"from": c, "ok": ok(False, "auth-required: we only accept events from registered users")},
+            {"from": d, "ok": ok("true", "")}],
+         "told": False, "done": False, "waiting": [a, b, c, d]},
+        {"name": "another-event", "answers": [{"from": a, "ok": ok(True, "", of=other)},
+                                              {"from": b, "ok": ["NOTICE", leave]}],
+         "told": False, "done": False, "waiting": [a, b, c, d]},
+        {"name": "offline", "answers": [], "told": False, "done": False, "waiting": [a, b, c, d]},
+        {"name": "nearby-only", "nearby": True, "answers": [], "told": True, "done": False, "waiting": [a, b, c, d]},
+        {"name": "a-relay-not-listed", "answers": [{"from": "wss://x.example", "ok": ok(True, "")},
+                                                   {"from": a, "ok": ok(True, "")}],
+         "told": True, "done": False, "waiting": [b, c, d]},
+        {"name": "one-relay-membership", "relays": ["wss://a.example"],
+         "answers": [{"from": "wss://a.example", "ok": ok(True, "")}], "told": True, "done": True, "waiting": []},
+        {"name": "expired", "answers": [], "after": 365 * 86400, "told": False, "done": True,
+         "waiting": [a, b, c, d]}]
 
 
 def H(label: str) -> bytes:
@@ -93,6 +189,7 @@ def generate() -> dict:
     f = Member(F, k["inbox F"])
     f.open_invite(inv, ev_invite, NOW)
     ev["join-F"] = f.join({"name": "Mom", "avatar": None}, NOW, **pins("join F"))
+    ev["leave-F"] = f.leave(NOW, **pins("leave F"))  # cancelled while its join waits: to the invite inbox (C§9.5)
     ev["join-X-same-token"] = ctl.wrap(X, k["inbox invite"].pub, {"type": "join", "token": inv.token,
                                                                     "inbox": X.pub, "profile": None, "caps": []},
                                        now=NOW, **pins("join X"))
@@ -303,6 +400,11 @@ def generate() -> dict:
                                "sensor_state": "active", "settings_unit": "mmol/L"}},
         "ble": ble_v,
         "bridges": bridges,
+        "relay_answers": {"keys": [{"url": u, "key": kk} for u, kk in RELAY_KEYS],
+                          "answers": [{"why": why, "frame": fr, "id": answered_id(fr), "kept": kept, "auth": au}
+                                      for why, fr, kept, au in RELAY_ANSWERS]},
+        "leave_outbox": {"wrap": "leave-F", "relays": OUTBOX_RELAYS,
+                         "runs": leave_outbox_runs(ev["leave-F"]["id"], ev["join-F"]["id"])},
     }
 
 
@@ -413,6 +515,27 @@ def verify_file(vec: dict, *, fill_final: bool = False) -> list[str]:
         rec = open_envelope(e, dkey)
         if next(tg[1] for tg in e["tags"] if tg[0] == "d") != dkey.dtag(object_name(body, rec["pubkey"])):
             fails.append(f"envelope {name}")
+    # relay answers (N§3.4) and the member's leave outbox (C§9.5)
+    for kc in vec["relay_answers"]["keys"]:
+        if relay_key(kc["url"]) != kc["key"]:
+            fails.append(f"relay key {kc['url']!r}")
+    for ac in vec["relay_answers"]["answers"]:
+        ok = RelayOk.parse(ac["frame"])
+        if (ok.event_id if ok else None, bool(ok and ok.kept), bool(ok and ok.auth_required)) != \
+                (ac["id"], ac["kept"], ac["auth"]):
+            fails.append(f"relay answer {ac['frame']}")
+    lo = vec["leave_outbox"]
+    wrap = vec["events"][lo["wrap"]]
+    for run in lo["runs"]:
+        pl = PendingLeave(wrap, run.get("relays", lo["relays"]), int(tag(wrap, "expiration")),
+                          nearby=run.get("nearby", False))
+        for an in run["answers"]:
+            ok = RelayOk.parse(an["ok"])
+            if ok:
+                pl.answered(an["from"], ok)
+        at = vec["now"] + run.get("after", 0)
+        if (pl.told, pl.done(at), pl.waiting_on()) != (run["told"], run["done"], run["waiting"]):
+            fails.append(f"leave outbox {run['name']}")
     sf, state = run_scenario(vec)
     fails += sf
     for kk, v in vec["scenario"]["final"].items():

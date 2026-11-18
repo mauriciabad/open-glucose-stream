@@ -8,8 +8,11 @@ import unittest
 import uuid
 from pathlib import Path
 
+import asyncio
+
 from ogs import crypto as c
-from ogs.nostr import Keys
+from ogs.nostr import Keys, RelayOk, relay_key
+from ogs.relay import Pool
 from ogs.d3 import control as ctl
 from ogs.d3 import data as D
 from ogs.d3 import vectors as V
@@ -17,6 +20,7 @@ from ogs.d3.ble import WINDOW, adv_uuid, auth, gatt_uuids, info
 from ogs.d3.core import (DEPTH, SPAN, DayKeys, Epoch, EpochSecret, Node, cover, day_of, descend, object_name, pad,
                          seal, sign_record)
 from ogs.d3.member import Member
+from ogs.d3.outbox import PendingLeave
 from ogs.d3.owner import Owner
 
 VECTORS = Path(__file__).resolve().parents[2] / "test-vectors" / "ogs-draft3.json"
@@ -197,6 +201,73 @@ class Lifecycle(unittest.TestCase):
         self.o.members[self.writer.M.pub]["from"] = day_of(NOW) - 100
         req = self.writer.request({"type": "history", "from": day_of(NOW) - 60, "to": day_of(NOW)}, NOW + 1)
         self.assertEqual(self.o.on_wrap(req, NOW + 1)[0], "rejected:too-many-days")
+
+
+class RelayAnswers(unittest.TestCase):
+    """N§3.4 and C§9.5: which answer keeps an event on which relay, and when a leave is told and done."""
+
+    def setUp(self):
+        o = Owner(Keys(bytes(31) + b"\x01"), [Keys(bytes(31) + b"\x02")], relays=[], profile=None, now=NOW)
+        self.wrap = _join(o, Keys(bytes(31) + b"\x03"), Keys(bytes(31) + b"\x04"), {"scopes": [], "back": 1},
+                          NOW).leave(NOW)
+        self.id = self.wrap["id"]
+
+    def leave(self, relays: list[str]) -> PendingLeave:
+        return PendingLeave(self.wrap, relays, NOW + ctl.TTL["leave"])
+
+    def test_true_keeps_it_with_or_without_a_duplicate_message_and_false_duplicate_too(self):
+        for frame in (["OK", self.id, True, ""], ["OK", self.id, True, "duplicate: already have this event"],
+                      ["OK", self.id, True], ["OK", self.id, True, "", "x"],
+                      ["OK", self.id, False, "duplicate: already have this event"]):
+            self.assertTrue(RelayOk.parse(frame).kept, frame)
+        for frame in (["OK", self.id, False, "blocked: no"], ["OK", self.id, False, "error: duplicate: key"],
+                      ["OK", self.id, "true", ""], ["OK", self.id, 1, ""], ["OK", self.id]):
+            self.assertFalse(RelayOk.parse(frame).kept, frame)
+        self.assertTrue(RelayOk.parse(["OK", self.id, False, "auth-required: sign in"]).auth_required)
+        self.assertIsNone(RelayOk.parse(["NOTICE", self.id]))
+
+    def test_a_relay_is_its_whole_url(self):
+        self.assertEqual(relay_key("wss://Relay.Example.org:443/"), relay_key("wss://relay.example.org"))
+        self.assertNotEqual(relay_key("wss://relay.example.org:4848"), relay_key("wss://relay.example.org"))
+        self.assertNotEqual(relay_key("wss://relay.example.org/inbox"), relay_key("wss://relay.example.org"))
+
+    def test_a_leave_is_told_at_one_relay_and_done_at_two(self):
+        p = self.leave(["wss://a.example/", "wss://b.example:4848", "wss://c.example"])
+        p.answered("wss://b.example", RelayOk(self.id, True))            # another relay: the port differs
+        p.answered("wss://a.example", RelayOk("00" * 32, True))          # another event
+        p.answered("wss://a.example", RelayOk(self.id, False, "blocked: no"))
+        self.assertFalse(p.told)
+        p.answered("wss://A.example:443", RelayOk(self.id, True, ""))
+        self.assertTrue(p.told)
+        self.assertFalse(p.done(NOW))
+        self.assertEqual(p.waiting_on(), ["wss://b.example:4848", "wss://c.example"])
+        p.answered("wss://b.example:4848/", RelayOk(self.id, True, "duplicate: already have this event"))
+        self.assertTrue(p.done(NOW))
+        self.assertTrue(self.leave(["wss://a.example"]).done(NOW + ctl.TTL["leave"]))
+
+    def test_the_pool_counts_answers_per_connection_and_sends_again_after_auth(self):
+        class Ws:
+            def __init__(self):
+                self.sent = []
+
+            async def send(self, text):
+                self.sent.append(json.loads(text))
+
+        async def run():
+            pool = Pool([], on_event=lambda *_: None, auth_key=Keys(bytes(31) + b"\x09"), log=lambda *_: None)
+            await pool.publish(self.wrap, wait=0)
+            ws = Ws()
+            await pool._handle("wss://a.example", ws, ["AUTH", "challenge"])
+            await pool._handle("wss://a.example", ws, ["OK", self.id, False, "auth-required: sign in"])
+            await pool._handle("wss://a.example", ws, ["OK", self.id, False, "duplicate: already have this event"])
+            await pool._handle("wss://b.example", ws, ["OK", self.id, "true", ""])
+            return pool, ws
+
+        pool, ws = asyncio.run(run())
+        self.assertEqual([m[0] for m in ws.sent], ["AUTH", "EVENT"])
+        self.assertEqual(ws.sent[1][1]["id"], self.id)
+        self.assertEqual([(u, kept) for u, kept, _ in pool.oks[self.id]],
+                         [("wss://a.example", False), ("wss://a.example", True), ("wss://b.example", False)])
 
 
 class Data(unittest.TestCase):
