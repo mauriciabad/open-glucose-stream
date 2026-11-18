@@ -19,7 +19,7 @@ INVITE_VERSION = 3
 FP_BYTES = 12           # C§8.1: identity fingerprint, 96 bits: grinding a matching key is out of reach even for
 SECRET_BYTES = 12       #         an invite that stands for months; with the 12-byte secret the text stays 34 chars
 TTL = {"invite": None, "join": 7 * 86400, "grant": 30 * 86400, "ended": 30 * 86400, "rekey": 7 * 86400,
-       "history": 86400, "profile": 7 * 86400, "inbox": 7 * 86400, "leave": 30 * 86400, "link": 7 * 86400,
+       "history": 86400, "profile": 7 * 86400, "inbox": 7 * 86400, "leave": 365 * 86400, "link": 7 * 86400,
        "manage": 7 * 86400, "invite-link": 7 * 86400}
 TO_MEMBER = ("grant", "ended", "invite-link")
 TO_ADMIN = ("join", "rekey", "history", "profile", "inbox", "leave", "link", "manage")

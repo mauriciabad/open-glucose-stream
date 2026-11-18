@@ -126,6 +126,12 @@ class Member:
         """rekey / history / profile / inbox / leave / link / manage, to the current epoch's administrator inbox."""
         return ctl.wrap(self.M, self.owner_inbox, body, now=now, **pins)
 
+    def leave(self, now: int | None = None, **pins) -> dict:
+        """C§9.5: `leave` to the newest administrator inbox, or the invite inbox while the join waits. The caller keeps
+        the wrap in an outbox until two relays accepted it, then deletes M."""
+        to = self.owner_inbox if self.status == "active" else self.invite_inbox
+        return ctl.wrap(self.M, to, {"type": "leave"}, now=now, **pins)
+
     # ---- authority (C§10.3) ---------------------------------------------------------------------------------------
 
     def role(self, view: View, pub: str, day: int) -> tuple[str, list[str]] | None:

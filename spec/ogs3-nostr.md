@@ -105,7 +105,7 @@ It helps most for a clinician catching up on 90 days. A plain REQ always works.
 ### N§4.3 Administrator
 
 ```
-inbox:   {"kinds":[1059], "#p":[<administrator inbox of the current and recent epochs>, <every open invite's inbox>]}
+inbox:   {"kinds":[1059], "#p":[<administrator inbox of every epoch started within the leave TTL>, <every open invite's inbox>]}
 stream:  {"kinds":[31078], "authors":[ the lane-r authors of members with a scope, for the days their records may be on ]}
 ```
 

@@ -381,13 +381,14 @@ MUST deduplicate by wrap `id`, and MUST ignore a `type` they don't know.
 | `history` | `M` → administrator inbox | 1 d | `{"from":<day>,"to":<day>}` |
 | `profile` | `M` → administrator inbox | 7 d | `{"profile":{…}}` |
 | `inbox` | `M` → administrator inbox | 7 d | `{"inbox":"<new member inbox>"}` |
-| `leave` | `M` → administrator inbox | 30 d | `{}` |
+| `leave` | `M` → administrator inbox (a pending joiner: the invite inbox) | 365 d | `{}` (C§9.5) |
 | `link` | `M` → administrator inbox | 7 d | `{"k":"<new member key>","inbox":"<its inbox>","label":"Watch"}` |
 | `manage` | `M` → administrator inbox | 7 d | `{"op":"remove","k":…}` or `{"op":"invite","offer":{…}}` |
 
 The **administrator inbox** is a key per epoch, generated with the epoch and announced in the membership (C§9.3).
-The administrator listens on the inboxes of the current and recent epochs and on every open invite's inbox. Inbox
-keys are the only stream keys that appear on relays (as `p` tags), and each lasts one epoch or one invite.
+The administrator listens on the inboxes of the current and recent epochs (every epoch that started within the
+`leave` TTL, so a late `leave` still arrives: C§9.5) and on every open invite's inbox. Inbox keys are the only stream
+keys that appear on relays (as `p` tags), and each lasts one epoch or one invite.
 
 ### C§9.2 Grant
 
@@ -440,16 +441,49 @@ epoch:
 
 For each wrap on one of its inboxes, deduplicated by wrap `id`:
 - **join:** C§8.6.
-- **rekey:** an active member gets a fresh grant; a removed one gets `ended`.
+- **rekey:** an active member gets a fresh grant; a removed one gets `ended` (`reason: "left"` when it left).
 - **history:** only from an active member, only for days inside its window and not after today, and at most 31
   days per request. The administrator republishes those days as `cgm` day archives (D§4.3), plus the entries of
   those days, under an epoch the member holds (C§7.1). Nothing is sent privately. Rate limit: RECOMMENDED one request
   per member per 10 minutes. A member can't read a day it has punctured (C§11.4): it requests history before it
   punctures.
 - **profile, inbox:** update the member's record.
-- **leave:** remove the member (C§11.2) without an `ended` notice.
+- **leave:** C§9.5.
 - **link:** C§11.8. **manage:** C§11.9.
 - Anything from a key that isn't a member is ignored.
+
+### C§9.5 Leaving
+
+A member that stops reading (or a joiner that cancels while its join waits) sends `leave`, so the administrator's
+list, its alerts' audience and the wearer's view stay true. It MUST be hard to lose: the member may leave offline or
+uninstall soon after, the administrator's device may be off for days, and relays drop events.
+
+Member:
+- Makes the wrap **before** it deletes `M` and its keys: sealed by `M`, to the newest administrator inbox it knows
+  (a pending joiner: the invite inbox), rumor `created_at` = now, expiration now + 365 days. Then it deletes `M`, its
+  covers and the stream's data.
+- Keeps the signed wrap (never `M`) in a durable outbox, with the membership's relays. It sends it to every relay at
+  once and over Bluetooth when connected to a proved publisher device (B§6), then again to every relay that has not
+  answered `OK true` at each start and whenever the network comes back (a mobile app: from the platform's deferred,
+  network-constrained job, so it goes while the app is closed), until **two** relays accepted it (every relay when
+  fewer are listed) or it expired. A relay asking for AUTH gets a throwaway key's.
+- SHOULD tell the person when no relay and no publisher device took it yet (offline), and that removing the app
+  before then loses it.
+- Sends nothing for a membership that already ended (`ended`, an expired grant). A leave is final for `M`: a member
+  that wants to read again joins with a new invite and a new `M` (C§8.4).
+
+Administrator, for a `leave` sealed by `M` (deduplicated by wrap `id`, C§9.1):
+- **An active member:** remove it (C§11.2) without an `ended` notice (nobody reads it), and record it as *left*, at
+  its rumor `created_at` kept between the start of its window and now (a device off for days still shows when it
+  left). It SHOULD tell the wearer.
+- **A pending join:** withdraw it. The invite stays used (C§8.6).
+- **Anything else** (a removed or left member, an unknown key): nothing. Relays keep a `leave` for a year and
+  administrators forget handled wraps sooner, so the same `leave` comes back: it MUST change nothing. A join from a
+  key that left is answered with `ended` (C§8.6), so a replayed `leave` can never undo a later approval, and no rule
+  compares two devices' clocks.
+
+What it does not cover: a member that uninstalls while offline before any relay or publisher device took its `leave`.
+Only silence tells then (a per-member *last seen*, out of scope here).
 
 ## C§10 Acceptance rules
 
