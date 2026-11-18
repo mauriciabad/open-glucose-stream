@@ -274,6 +274,14 @@ stable.
     offline, and is left to a later *last seen*.
 - **Coming back** takes a new invite and a new `M`, as every follow app does (a re-approval of a key that left
   would need a clock rule against replayed leaves, and a lost device would keep a key the wearer re-trusts in one tap).
+- **Amended 2026-11-19: what "accepted" means** (N§3.4). Sukrara's emulator walk found a leave its relay kept that
+  the member never counted: its answers (`OK true` "duplicate: already have this event", every reconnect) were matched
+  by host, and the relay the app connected to (a test relay standing in for the membership's; on another app, a URL
+  with a port) wasn't spelled as the leave's list spells it. So the rule now says which answer counts for which relay:
+  by event id on the connection it came on, relays told apart by normalised URL, `true` whatever the message, and
+  `false` with `duplicate:` too (NIP-20 requires `true`, some relays don't). Considered: matching by event id alone
+  (two answers from one relay would count as two), and by host (a port or a path is another relay). A write that
+  needs AUTH gets a one-time key's, as the leave already did.
 
 ## 3. What the state-of-the-art review changed
 

@@ -35,7 +35,8 @@ def cmd_d3(a) -> int:
     print(f"{'FAIL' if fails else 'PASS'}: {len(vec['events'])} events, {len(vec['plaintexts'])} wraps opened, "
           f"{len(vec['tree']['covers'])} covers, {len(vec['invite_checks'])} invite checks, "
           f"{len(vec['owner_checks'])} owner checks, BLE at {len(vec['ble']['frames_by_att_mtu'])} MTUs, "
-          f"scenario {len(vec['scenario']['steps'])} steps")
+          f"scenario {len(vec['scenario']['steps'])} steps, {len(vec['relay_answers']['answers'])} relay answers, "
+          f"leave outbox {len(vec['leave_outbox']['runs'])} runs")
     return 1 if fails else 0
 
 

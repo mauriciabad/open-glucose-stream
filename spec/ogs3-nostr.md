@@ -57,8 +57,8 @@ To every relay in the membership's `relays` (N§7). RECOMMENDED: three relays.
   event a minute per publisher while a sensor runs, plus a few a day for state, entries and alerts.
 - Leave at least one second between events to the same relay. Some relays ban bursts. A backlog after a gap goes out
   oldest first, at that pace. An alert jumps the queue.
-- On `OK false` with `rate-limited:`, retry later. On `invalid:` or `blocked:`, try the other relays. Never retry
-  with another key.
+- Read each relay's answer as N§3.4. On `OK false` with `rate-limited:`, retry later. On `invalid:` or `blocked:`,
+  try the other relays. Never retry with another key.
 
 ### N§3.3 Protected events (OPTIONAL)
 
@@ -66,6 +66,40 @@ A publisher MAY add NIP-70's `["-"]` tag and authenticate (NIP-42) as the blinde
 relay that honours NIP-70 then refuses copies of the envelope from anyone else. That stops a member from replaying a
 publisher's envelopes to other relays, which it could do but has little reason to. The cost is that the relay must
 support AUTH. Members MUST accept envelopes with or without the tag.
+
+### N§3.4 Relay answers
+
+What a relay's answer to an `EVENT` means. It applies to every event a client sends (envelopes, control wraps) and
+to every sender that waits for relays to keep one (the leave outbox, C§9.5). Vectors: `relay_answers` and
+`leave_outbox`.
+
+- **Matching.** The answer is NIP-01's `["OK", <event id>, <true|false>, <message>, …]` ([NIP-01], "From relay to
+  client"; it absorbed [NIP-20]). It answers the event with that id on the connection it came on, and counts for the
+  relay that connection was opened to: never for another relay, and never for a relay the event wasn't sent to.
+- **Which relay.** Relays are told apart by URL after normalisation ([RFC 3986] §6.2.2–6.2.3, as nostr-tools'
+  `normalizeURL`): scheme and host in lower case; the scheme's default port (443 for `wss`, 80 for `ws`), a fragment,
+  repeated slashes and a trailing `/` dropped; the path keeps its case. `wss://Relay.example:443/` is
+  `wss://relay.example`; `wss://relay.example:4848` and `wss://relay.example/inbox` are other relays. Never by host
+  alone: a port or a path makes another relay, and an app that sends to a stand-in relay (a test relay, a proxy)
+  counts that relay, not the ones it stands in for.
+- **Kept.** The relay keeps the event when the third element is the JSON `true`, whatever the message: empty,
+  `duplicate:` (it already had it: the usual answer to a resend after a lost answer or a reconnect), `pow:` or anything
+  else, with or without the message and a fifth element. Also `false` with a message that starts with `duplicate:`:
+  NIP-20 says a relay that already has the event MUST answer `true`, yet some relays answer `false` (grain before
+  0.8.2, relays built from go-nostr examples), and the relay holds that id either way. For an addressable envelope,
+  kept means that version or a newer one. Nothing else is kept: any other `false`, a verdict that isn't a JSON
+  boolean, a missing verdict, an answer for another id, silence.
+- **Not kept.** `auth-required:` ([NIP-42], "in response to an `EVENT` message"): authenticate (N§5), then send the
+  event again on that connection. `rate-limited:` and `error:`: send it again later. `blocked:`, `restricted:`,
+  `invalid:`, `pow:`: that relay won't keep it; the other relays carry it (N§3.2).
+- `OK true` is a receipt, not a promise to serve the event later ([nips#2539] measured a relay that answered `true`
+  and never served the event). A sender that must not lose an event waits for two relays (C§9.5).
+
+[NIP-01]: https://github.com/nostr-protocol/nips/blob/master/01.md
+[NIP-20]: https://github.com/nostr-protocol/nips/blob/ab6308c29a/20.md
+[NIP-42]: https://github.com/nostr-protocol/nips/blob/master/42.md
+[RFC 3986]: https://www.rfc-editor.org/rfc/rfc3986#section-6.2.2
+[nips#2539]: https://github.com/nostr-protocol/nips/issues/2539
 
 ## N§4 Subscriptions
 
@@ -117,8 +151,9 @@ stream:  {"kinds":[31078], "authors":[ the lane-r authors of members with a scop
   days, so an expiration computed from it would arrive already expired.
 - **AUTH (NIP-42).** Some relays serve kind 1059 only to the `p`-tagged key after AUTH, as NIP-59 recommends.
   Clients MUST answer such a challenge by signing kind 22242 with the inbox key the subscription is for (the member's
-  inbox, the administrator's inbox, or the invite key). They MUST NOT authenticate with `I`, `D`, `M` or any key of
-  the user's own Nostr identity.
+  inbox, the administrator's inbox, or the invite key). A relay that answers a wrap's `EVENT` with `auth-required:`
+  (N§3.4) gets a fresh one-time key's AUTH, then the wrap again: a write needs no identity, and the wrap's own signer
+  is one-time already. They MUST NOT authenticate with `I`, `D`, `M` or any key of the user's own Nostr identity.
 - Kind 21059 (ephemeral gift wrap, NIP-59) is not used: every control message must survive the recipient being
   offline.
 

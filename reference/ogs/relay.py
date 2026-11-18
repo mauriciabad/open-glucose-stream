@@ -10,7 +10,7 @@ from typing import Callable
 
 import websockets
 
-from .nostr import Keys, sign
+from .nostr import Keys, RelayOk, sign
 
 
 class Pool:
@@ -22,7 +22,10 @@ class Pool:
         self.log = log
         self.subs: dict[str, dict] = {}
         self.conns: dict[str, websockets.ClientConnection] = {}
+        # event id -> (relay URL, the relay keeps it (N§3.4), message), one per answer
         self.oks: dict[str, list[tuple[str, bool, str]]] = {}
+        self.sent: dict[str, dict] = {}
+        self._auth_retried: set[tuple[str, str]] = set()
         self._tasks: list[asyncio.Task] = []
 
     async def start(self):
@@ -65,8 +68,14 @@ class Pool:
         typ = msg[0]
         if typ == "EVENT" and len(msg) >= 3:
             self.on_event(msg[2], url)
-        elif typ == "OK":
-            self.oks.setdefault(msg[1], []).append((url, bool(msg[2]), msg[3] if len(msg) > 3 else ""))
+        elif typ == "OK" and (ok := RelayOk.parse(msg)) is not None:
+            # N§3.4: matched by id on this connection; `true`, or `false` with `duplicate:`, keeps it
+            self.oks.setdefault(ok.event_id, []).append((url, ok.kept, ok.message))
+            ev = self.sent.get(ok.event_id)
+            if ok.auth_required and ev is not None and (url, ok.event_id) not in self._auth_retried:
+                self._auth_retried.add((url, ok.event_id))
+                await asyncio.sleep(1)          # AUTH was answered on the challenge; send the event again
+                await ws.send(json.dumps(["EVENT", ev]))
         elif typ == "AUTH" and self.auth_key is not None:
             await ws.send(json.dumps(["AUTH", sign(self.auth_key, 22242, "", [["relay", url], ["challenge", msg[1]]])]))
         elif typ == "CLOSED" and "auth-required" in (msg[2] if len(msg) > 2 else ""):
@@ -85,6 +94,8 @@ class Pool:
                 pass
 
     async def publish(self, ev: dict, wait: float = 5.0) -> list[tuple[str, bool, str]]:
+        """Sends `ev` to every connected relay and returns their answers: (relay URL, kept per N§3.4, message)."""
+        self.sent[ev["id"]] = ev
         for ws in list(self.conns.values()):
             try:
                 await ws.send(json.dumps(["EVENT", ev]))

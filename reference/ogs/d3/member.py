@@ -127,8 +127,8 @@ class Member:
         return ctl.wrap(self.M, self.owner_inbox, body, now=now, **pins)
 
     def leave(self, now: int | None = None, **pins) -> dict:
-        """C§9.5: `leave` to the newest administrator inbox, or the invite inbox while the join waits. The caller keeps
-        the wrap in an outbox until two relays accepted it, then deletes M."""
+        """C§9.5: `leave` to the newest administrator inbox, or the invite inbox while the join waits. The caller then
+        deletes M and keeps the wrap in an outbox (`outbox.PendingLeave`) until two relays keep it (N§3.4)."""
         to = self.owner_inbox if self.status == "active" else self.invite_inbox
         return ctl.wrap(self.M, to, {"type": "leave"}, now=now, **pins)
 

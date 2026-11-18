@@ -154,7 +154,7 @@ OGS moves numbers. It is not a medical device, and nothing in it is validated fo
 3. Profiles, names and pictures exist only inside encrypted payloads, and pictures only as renderer parameters
    (D§10).
 4. No sensor serial, transmitter id, account id, phone model or location anywhere in a record (D§1).
-5. AUTH only with the inbox or invite key the subscription is for (N§5).
+5. AUTH only with the inbox or invite key the subscription is for, or a one-time key for a write (N§5).
 6. An app MUST NOT send OGS data to a third party (a bridge, a push server, an analytics service) without the user's
    explicit consent for that destination.
 

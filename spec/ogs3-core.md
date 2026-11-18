@@ -173,7 +173,8 @@ A record is a NIP-01 event:
 - `id` and `sig` per NIP-01 and BIP-340.
 
 A record MUST NOT be published on its own. Implementations MUST NOT use their stream keys to sign anything else
-except the NIP-59 seals of their own control messages, and NIP-42 AUTH as their inbox keys (N§5).
+except the NIP-59 seals of their own control messages, and NIP-42 AUTH as their inbox keys (N§5; a write's AUTH
+uses a one-time key).
 
 ### C§6.2 Authorship
 
@@ -463,12 +464,16 @@ Member:
   (a pending joiner: the invite inbox), rumor `created_at` = now, expiration now + 365 days. Then it deletes `M`, its
   covers and the stream's data.
 - Keeps the signed wrap (never `M`) in a durable outbox, with the membership's relays. It sends it to every relay at
-  once and over Bluetooth when connected to a proved publisher device (B§6), then again to every relay that has not
-  answered `OK true` at each start and whenever the network comes back (a mobile app: from the platform's deferred,
-  network-constrained job, so it goes while the app is closed), until **two** relays accepted it (every relay when
-  fewer are listed) or it expired. A relay asking for AUTH gets a throwaway key's.
-- SHOULD tell the person when no relay and no publisher device took it yet (offline), and that removing the app
-  before then loses it.
+  once and over Bluetooth when connected to a proved publisher device (B§6), then again to every one of those relays
+  that doesn't keep it yet at each start and whenever the network comes back (a mobile app: from the platform's
+  deferred, network-constrained job, so it goes while the app is closed), until **two** of them keep it (every relay
+  when fewer are listed) or it expired. A relay keeps it when its answer on the connection the wrap went out on says
+  so (N§3.4: `OK true` with or without a message such as `duplicate:`, or `OK false` with `duplicate:`); each relay
+  counts once, told apart by its normalised URL (`wss://relay.example/` and `wss://relay.example` are one relay,
+  `wss://relay.example:4848` another), and an answer from a relay the leave doesn't list counts for nothing. A relay
+  asking for AUTH gets a one-time key's (N§5), then the leave again.
+- **Told** once one of its relays keeps it or a publisher device took it over Bluetooth (the write's response). It
+  SHOULD tell the person while it isn't told (offline), and that removing the app before then loses it.
 - Sends nothing for a membership that already ended (`ended`, an expired grant). A leave is final for `M`: a member
   that wants to read again joins with a new invite and a new `M` (C§8.4).
 
